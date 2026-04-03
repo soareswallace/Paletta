@@ -4,7 +4,12 @@ struct ContentView: View {
 
     @StateObject private var camera = CameraViewModel()
     @StateObject private var paletteStore = PaletteStoreViewModel(store: UserDefaultsPaletteStore())
+    @State private var format: ColorFormat = .hex
     @State private var showSaved = false
+    @State private var showSaveAlert = false
+    @State private var paletteName = ""
+    @State private var showShareSheet = false
+    @State private var exportImage: UIImage?
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -12,24 +17,32 @@ struct ContentView: View {
                 .ignoresSafeArea()
 
             if !camera.palette.isEmpty {
-                PaletteView(colors: camera.palette, paletteStore: paletteStore)
+                PaletteView(colors: camera.palette, format: $format)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
 
-            // Saved palettes button — top right
+            // Floating buttons — top right
             VStack {
                 HStack {
                     Spacer()
-                    Button {
-                        showSaved = true
-                    } label: {
-                        Image(systemName: "swatchpalette")
-                            .font(.system(size: 20, weight: .medium))
-                            .foregroundStyle(.white)
-                            .padding(12)
-                            .background(.ultraThinMaterial, in: Circle())
+                    VStack(spacing: 12) {
+                        floatingButton(icon: "swatchpalette") { showSaved = true }
+                            .accessibilityLabel("View saved palettes")
+
+                        if !camera.palette.isEmpty {
+                            floatingButton(icon: "square.and.arrow.down") {
+                                paletteName = ""
+                                showSaveAlert = true
+                            }
+                            .accessibilityLabel("Save palette")
+
+                            floatingButton(icon: "square.and.arrow.up") {
+                                exportImage = PaletteExporter.image(from: camera.palette, format: format)
+                                showShareSheet = true
+                            }
+                            .accessibilityLabel("Export palette")
+                        }
                     }
-                    .accessibilityLabel("View saved palettes")
                     .padding(.top, 60)
                     .padding(.trailing, 20)
                 }
@@ -45,9 +58,47 @@ struct ContentView: View {
         .sheet(isPresented: $showSaved) {
             SavedPalettesView(store: paletteStore)
         }
+        .sheet(isPresented: $showShareSheet) {
+            if let img = exportImage {
+                ShareSheet(items: [img])
+            }
+        }
+        .alert("Save Palette", isPresented: $showSaveAlert) {
+            TextField("Name", text: $paletteName)
+            Button("Save") {
+                let name = paletteName.trimmingCharacters(in: .whitespaces)
+                guard !name.isEmpty else { return }
+                paletteStore.save(name: name, hexCodes: camera.palette.map(\.hexString))
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Give this palette a name.")
+        }
         .onAppear { camera.start() }
         .onDisappear { camera.stop() }
     }
+
+    private func floatingButton(icon: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: icon)
+                .font(.system(size: 20, weight: .medium))
+                .foregroundStyle(.white)
+                .padding(12)
+                .background(.ultraThinMaterial, in: Circle())
+        }
+    }
+}
+
+// MARK: - Share sheet bridge
+
+private struct ShareSheet: UIViewControllerRepresentable {
+    let items: [Any]
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: items, applicationActivities: nil)
+    }
+
+    func updateUIViewController(_ uvc: UIActivityViewController, context: Context) {}
 }
 
 #Preview {
