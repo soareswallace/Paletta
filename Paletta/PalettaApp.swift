@@ -19,6 +19,7 @@ struct PalettaApp: App {
                     }
                 }
             }
+            .ignoresSafeArea()
         }
     }
 }
