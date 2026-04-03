@@ -41,11 +41,26 @@ struct SavedPalettesView: View {
 private struct SavedPaletteRow: View {
 
     let palette: SavedPalette
+    @State private var showShareSheet = false
+    @State private var exportImage: UIImage?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(palette.name)
-                .font(.headline)
+            HStack {
+                Text(palette.name)
+                    .font(.headline)
+                Spacer()
+                Button {
+                    let colors = palette.hexCodes.compactMap { UIColor(hexString: $0) }
+                    exportImage = PaletteExporter.image(from: colors, format: .hex)
+                    showShareSheet = true
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundStyle(.secondary)
+                }
+                .accessibilityLabel("Export \(palette.name)")
+            }
             HStack(spacing: 6) {
                 ForEach(palette.hexCodes, id: \.self) { hex in
                     RoundedRectangle(cornerRadius: 6)
@@ -56,7 +71,20 @@ private struct SavedPaletteRow: View {
             }
         }
         .padding(.vertical, 6)
+        .sheet(isPresented: $showShareSheet) {
+            if let img = exportImage {
+                ShareSheet(items: [img])
+            }
+        }
     }
+}
+
+private struct ShareSheet: UIViewControllerRepresentable {
+    let items: [Any]
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: items, applicationActivities: nil)
+    }
+    func updateUIViewController(_ uvc: UIActivityViewController, context: Context) {}
 }
 
 // MARK: - ViewModel

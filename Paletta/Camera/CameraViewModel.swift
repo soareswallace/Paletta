@@ -11,12 +11,17 @@ class CameraViewModel: ObservableObject {
     @Published var palette: [UIColor] = []
     @Published var permissionDenied = false
     @Published var cameraUnavailable = false
+    @Published var colorCount: Int
 
     private let controller = CameraController()
+    private let countStore: ColorCountStoring
 
     var session: AVCaptureSession { controller.session }
 
-    init() {
+    init(countStore: ColorCountStoring = UserDefaultsColorCountStore()) {
+        self.countStore = countStore
+        self.colorCount = countStore.colorCount
+        controller.colorCount = countStore.colorCount
         controller.onColors = { [weak self] colors in
             guard let self else { return }
             Task { @MainActor in
@@ -54,6 +59,13 @@ class CameraViewModel: ObservableObject {
     }
 
     func stop() { controller.stop() }
+
+    func cycleColorCount() {
+        let next = validColorCounts[(validColorCounts.firstIndex(of: colorCount)! + 1) % validColorCounts.count]
+        colorCount = next
+        countStore.set(count: next)
+        controller.colorCount = next
+    }
 }
 
 // MARK: - Camera Controller (no actor isolation)
@@ -62,6 +74,7 @@ private final class CameraController: NSObject {
 
     var onColors: (([UIColor]) -> Void)?
     var onSetupFailure: (() -> Void)?
+    var colorCount: Int = 5
 
     let session = AVCaptureSession()
 
@@ -125,7 +138,7 @@ extension CameraController: AVCaptureVideoDataOutputSampleBufferDelegate {
 
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
 
-        let colors = ColorExtractor.dominantColors(from: pixelBuffer)
+        let colors = ColorExtractor.dominantColors(from: pixelBuffer, count: colorCount)
         let smoothed = blend(colors, previous: previousColors)
         previousColors = smoothed
         onColors?(smoothed)

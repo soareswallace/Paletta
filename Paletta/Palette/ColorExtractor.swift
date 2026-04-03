@@ -37,7 +37,7 @@ struct ColorExtractor {
     }
 }
 
-// MARK: - Hex helper
+// MARK: - Hex helpers
 
 extension UIColor {
     var hexString: String {
@@ -45,5 +45,16 @@ extension UIColor {
         getRed(&r, green: &g, blue: &b, alpha: nil)
         return String(format: "#%02X%02X%02X",
                       Int(r * 255), Int(g * 255), Int(b * 255))
+    }
+
+    convenience init?(hexString: String) {
+        let hex = hexString.trimmingCharacters(in: CharacterSet(charactersIn: "#"))
+        guard hex.count == 6, let value = UInt64(hex, radix: 16) else { return nil }
+        self.init(
+            red:   CGFloat((value >> 16) & 0xFF) / 255,
+            green: CGFloat((value >>  8) & 0xFF) / 255,
+            blue:  CGFloat( value        & 0xFF) / 255,
+            alpha: 1
+        )
     }
 }

@@ -30,6 +30,19 @@ struct ContentView: View {
                         floatingButton(icon: "swatchpalette") { showSaved = true }
                             .accessibilityLabel("View saved palettes")
 
+                        // Color count cycle button
+                        Button {
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                            camera.cycleColorCount()
+                        } label: {
+                            Text("\(camera.colorCount)")
+                                .font(.system(size: 17, weight: .semibold))
+                                .foregroundStyle(.white)
+                                .frame(width: 44, height: 44)
+                                .background(.ultraThinMaterial, in: Circle())
+                        }
+                        .accessibilityLabel("Color count: \(camera.colorCount). Tap to change.")
+
                         if !camera.palette.isEmpty {
                             floatingButton(icon: "square.and.arrow.down") {
                                 paletteName = ""
