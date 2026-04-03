@@ -29,6 +29,29 @@ final class KMeansTests: XCTestCase {
         }
     }
 
+    func testSortedByHuePutsRedBeforeBlue() {
+        let red  = KMeansColor(r: 1, g: 0, b: 0)
+        let green = KMeansColor(r: 0, g: 1, b: 0)
+        let blue = KMeansColor(r: 0, g: 0, b: 1)
+        let sorted = sortedByHue([blue, red, green])
+        XCTAssertEqual(sorted[0].r, red.r, accuracy: 0.01)
+        XCTAssertEqual(sorted[1].g, green.g, accuracy: 0.01)
+        XCTAssertEqual(sorted[2].b, blue.b, accuracy: 0.01)
+    }
+
+    func testSortedByHueIsStable() {
+        let colors = [
+            KMeansColor(r: 0, g: 0, b: 1),
+            KMeansColor(r: 1, g: 0, b: 0),
+            KMeansColor(r: 0, g: 1, b: 0),
+        ]
+        let a = sortedByHue(colors)
+        let b = sortedByHue(colors.reversed())
+        XCTAssertEqual(a.map(\.r), b.map(\.r))
+        XCTAssertEqual(a.map(\.g), b.map(\.g))
+        XCTAssertEqual(a.map(\.b), b.map(\.b))
+    }
+
     func testCentroidIsAverageOfCluster() {
         // All pixels are the same — centroid should equal that color
         let color = KMeansColor(r: 0.4, g: 0.6, b: 0.2)

@@ -32,7 +32,7 @@ struct ColorExtractor {
 
         guard pixels.count >= count else { return [] }
 
-        let centroids = kMeans(pixels: pixels, k: count, iterations: 12)
+        let centroids = sortedByHue(kMeans(pixels: pixels, k: count, iterations: 12))
         return centroids.map { UIColor(red: CGFloat($0.r), green: CGFloat($0.g), blue: CGFloat($0.b), alpha: 1) }
     }
 }
