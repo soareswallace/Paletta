@@ -22,7 +22,7 @@ final class InMemoryPaletteStore: PaletteStoring {
     }
 }
 
-final class UserDefaultsPaletteStore: PaletteStoring {
+struct UserDefaultsPaletteStore: PaletteStoring {
     private let key = "saved_palettes"
 
     func save(_ palette: SavedPalette) {
