@@ -18,7 +18,7 @@ class CameraViewModel: ObservableObject {
 
     var session: AVCaptureSession { controller.session }
 
-    init(countStore: ColorCountStoring = UserDefaultsColorCountStore()) {
+    init(countStore: ColorCountStoring) {
         self.countStore = countStore
         self.colorCount = countStore.colorCount
         controller.colorCount = countStore.colorCount

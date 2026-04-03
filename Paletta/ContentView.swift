@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
 
-    @StateObject private var camera = CameraViewModel()
+    @StateObject private var camera = CameraViewModel(countStore: UserDefaultsColorCountStore())
     @StateObject private var paletteStore = PaletteStoreViewModel(store: UserDefaultsPaletteStore())
     @Environment(\.scenePhase) private var scenePhase
     @State private var format: ColorFormat = .hex
