@@ -7,7 +7,7 @@ let package = Package(
         .target(
             name: "PalettaCore",
             path: "Paletta/Palette",
-            sources: ["KMeans.swift", "RALMatcher.swift", "SavedPalette.swift", "PaletteStore.swift"]
+            sources: ["KMeans.swift", "RALMatcher.swift", "SavedPalette.swift", "PaletteStore.swift", "OnboardingStorage.swift"]
         ),
         .testTarget(
             name: "PalettaCoreTests",

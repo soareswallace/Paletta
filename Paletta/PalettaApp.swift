@@ -4,6 +4,8 @@ import SwiftUI
 struct PalettaApp: App {
 
     @State private var splashDone = false
+    @State private var onboardingDone = false
+    private let onboardingStorage = UserDefaultsOnboardingStorage()
 
     var body: some Scene {
         WindowGroup {
@@ -16,6 +18,15 @@ struct PalettaApp: App {
                             }
                         }
                         .ignoresSafeArea()
+                    } else if !onboardingDone && onboardingStorage.shouldShowOnboarding {
+                        OnboardingView {
+                            onboardingStorage.markComplete()
+                            withAnimation(.easeInOut(duration: 0.4)) {
+                                onboardingDone = true
+                            }
+                        }
+                        .ignoresSafeArea()
+                        .transition(.opacity)
                     }
                 }
         }
