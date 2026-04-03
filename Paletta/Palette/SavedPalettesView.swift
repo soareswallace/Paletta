@@ -8,6 +8,8 @@ struct SavedPalettesView: View {
 
     @ObservedObject var store: PaletteStoreViewModel
     @Environment(\.dismiss) private var dismiss
+    @State private var exportImage: UIImage?
+    @State private var showShareSheet = false
 
     var body: some View {
         ZStack {
@@ -51,7 +53,11 @@ struct SavedPalettesView: View {
                             ForEach(store.palettes) { palette in
                                 PaletteCard(
                                     palette: palette,
-                                    onDelete: { store.delete(palette) }
+                                    onDelete: { store.delete(palette) },
+                                    onExport: { image in
+                                        exportImage = image
+                                        showShareSheet = true
+                                    }
                                 )
                             }
                         }
@@ -61,6 +67,11 @@ struct SavedPalettesView: View {
                 }
             }
         }
+        .sheet(isPresented: $showShareSheet) {
+            if let img = exportImage {
+                ShareSheet(items: [img])
+            }
+        }
     }
 }
 
@@ -68,8 +79,7 @@ private struct PaletteCard: View {
 
     let palette: SavedPalette
     let onDelete: () -> Void
-    @State private var showShareSheet = false
-    @State private var exportImage: UIImage?
+    let onExport: (UIImage) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -82,8 +92,8 @@ private struct PaletteCard: View {
                 HStack(spacing: 16) {
                     Button {
                         let colors = palette.hexCodes.compactMap { UIColor(hexString: $0) }
-                        exportImage = PaletteExporter.image(from: colors, format: .hex)
-                        showShareSheet = true
+                        let image = PaletteExporter.image(from: colors, format: .hex)
+                        onExport(image)
                     } label: {
                         Image(systemName: "square.and.arrow.up")
                             .font(.system(size: 14, weight: .medium))
@@ -124,11 +134,6 @@ private struct PaletteCard: View {
         }
         .padding(16)
         .background(cardBackground, in: RoundedRectangle(cornerRadius: 16))
-        .sheet(isPresented: $showShareSheet) {
-            if let img = exportImage {
-                ShareSheet(items: [img])
-            }
-        }
     }
 }
 
