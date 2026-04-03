@@ -3,7 +3,7 @@ import SwiftUI
 struct ContentView: View {
 
     @StateObject private var camera = CameraViewModel()
-    @StateObject private var paletteStore = PaletteStoreViewModel()
+    @StateObject private var paletteStore = PaletteStoreViewModel(store: UserDefaultsPaletteStore())
     @State private var showSaved = false
 
     var body: some View {

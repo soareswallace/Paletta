@@ -66,7 +66,7 @@ final class PaletteStoreViewModel: ObservableObject {
     @Published private(set) var palettes: [SavedPalette] = []
     private let store: PaletteStoring
 
-    init(store: PaletteStoring = UserDefaultsPaletteStore()) {
+    init(store: PaletteStoring) {
         self.store = store
         palettes = store.load().sorted { $0.createdAt > $1.createdAt }
     }
