@@ -49,7 +49,7 @@ private final class CameraController: NSObject {
 
     private func setupSession() {
         session.beginConfiguration()
-        session.sessionPreset = .medium
+        session.sessionPreset = .hd1920x1080
 
         guard
             let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
