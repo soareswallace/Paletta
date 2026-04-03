@@ -1,17 +1,31 @@
 import SwiftUI
 
+enum ColorFormat { case hex, ral }
+
 struct PaletteView: View {
 
     let colors: [UIColor]
+    @State private var format: ColorFormat = .hex
 
     var body: some View {
-        HStack(spacing: 12) {
-            ForEach(colors.indices, id: \.self) { i in
-                SwatchView(color: colors[i])
+        VStack(spacing: 12) {
+            // Toggle
+            Picker("Format", selection: $format) {
+                Text("HEX").tag(ColorFormat.hex)
+                Text("RAL").tag(ColorFormat.ral)
+            }
+            .pickerStyle(.segmented)
+            .padding(.horizontal, 4)
+
+            // Swatches
+            HStack(spacing: 12) {
+                ForEach(colors.indices, id: \.self) { i in
+                    SwatchView(color: colors[i], format: format)
+                }
             }
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 16)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24))
         .padding(.horizontal, 16)
         .padding(.bottom, 40)
@@ -21,6 +35,21 @@ struct PaletteView: View {
 private struct SwatchView: View {
 
     let color: UIColor
+    let format: ColorFormat
+
+    private var label: String {
+        switch format {
+        case .hex: return color.hexString
+        case .ral:
+            let match = nearestRAL(to: color)
+            return match.code
+        }
+    }
+
+    private var sublabel: String? {
+        guard format == .ral else { return nil }
+        return nearestRAL(to: color).name
+    }
 
     var body: some View {
         VStack(spacing: 6) {
@@ -29,11 +58,23 @@ private struct SwatchView: View {
                 .frame(height: 56)
                 .shadow(color: Color(color).opacity(0.4), radius: 6, y: 3)
 
-            Text(color.hexString)
-                .font(.system(size: 10, weight: .medium, design: .monospaced))
+            Text(label)
+                .font(.system(size: 9, weight: .medium, design: .monospaced))
                 .foregroundStyle(.primary)
-                .onTapGesture { UIPasteboard.general.string = color.hexString }
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+
+            if let sub = sublabel {
+                Text(sub)
+                    .font(.system(size: 8, weight: .regular))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
         }
         .frame(maxWidth: .infinity)
+        .onTapGesture {
+            UIPasteboard.general.string = label
+        }
     }
 }

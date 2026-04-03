@@ -1,0 +1,246 @@
+// RAL Classic color database — community RGB approximations
+import UIKit
+
+struct RALColor {
+    let code: String
+    let name: String
+    let r: UInt8
+    let g: UInt8
+    let b: UInt8
+}
+
+func nearestRAL(to color: UIColor) -> RALColor {
+    var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0
+    color.getRed(&red, green: &green, blue: &blue, alpha: nil)
+    let r = Float(red   * 255)
+    let g = Float(green * 255)
+    let b = Float(blue  * 255)
+    return ralDatabase.min { distSq($0, r, g, b) < distSq($1, r, g, b) }!
+}
+
+private func distSq(_ c: RALColor, _ r: Float, _ g: Float, _ b: Float) -> Float {
+    let dr = Float(c.r) - r
+    let dg = Float(c.g) - g
+    let db = Float(c.b) - b
+    return dr*dr + dg*dg + db*db
+}
+
+private func ral(_ code: String, _ name: String, _ r: UInt8, _ g: UInt8, _ b: UInt8) -> RALColor {
+    RALColor(code: code, name: name, r: r, g: g, b: b)
+}
+
+let ralDatabase: [RALColor] = [
+    // MARK: 1xxx — Yellows
+    ral("RAL 1000", "Green beige",       190, 189, 127),
+    ral("RAL 1001", "Beige",             194, 176, 120),
+    ral("RAL 1002", "Sand yellow",       197, 168,  91),
+    ral("RAL 1003", "Signal yellow",     229, 174,   0),
+    ral("RAL 1004", "Golden yellow",     205, 160,   0),
+    ral("RAL 1005", "Honey yellow",      169, 131,   0),
+    ral("RAL 1006", "Maize yellow",      214, 154,   0),
+    ral("RAL 1007", "Daffodil yellow",   220, 156,   0),
+    ral("RAL 1011", "Brown beige",       161, 121,  59),
+    ral("RAL 1012", "Lemon yellow",      196, 176,  55),
+    ral("RAL 1013", "Oyster white",      226, 218, 191),
+    ral("RAL 1014", "Ivory",             220, 203, 161),
+    ral("RAL 1015", "Light ivory",       227, 215, 187),
+    ral("RAL 1016", "Sulfur yellow",     233, 225,  16),
+    ral("RAL 1017", "Saffron yellow",    244, 188,  67),
+    ral("RAL 1018", "Zinc yellow",       250, 223,   0),
+    ral("RAL 1019", "Grey beige",        163, 150, 113),
+    ral("RAL 1020", "Olive yellow",      155, 147,  83),
+    ral("RAL 1021", "Rape yellow",       243, 188,   0),
+    ral("RAL 1023", "Traffic yellow",    248, 195,   0),
+    ral("RAL 1024", "Ochre yellow",      174, 148,  83),
+    ral("RAL 1027", "Curry",             166, 138,   0),
+    ral("RAL 1028", "Melon yellow",      255, 181,   0),
+    ral("RAL 1032", "Broom yellow",      213, 171,   0),
+    ral("RAL 1033", "Dahlia yellow",     243, 163,   0),
+    ral("RAL 1034", "Pastel yellow",     234, 170,  90),
+    ral("RAL 1037", "Sun yellow",        234, 152,   0),
+
+    // MARK: 2xxx — Oranges
+    ral("RAL 2000", "Yellow orange",     218, 118,   0),
+    ral("RAL 2001", "Red orange",        184,  75,  20),
+    ral("RAL 2002", "Vermilion",         188,  65,  28),
+    ral("RAL 2003", "Pastel orange",     243, 122,  33),
+    ral("RAL 2004", "Pure orange",       232,  95,  12),
+    ral("RAL 2008", "Bright red orange", 237, 118,  52),
+    ral("RAL 2009", "Traffic orange",    221,  95,   0),
+    ral("RAL 2010", "Signal orange",     208,  99,  45),
+    ral("RAL 2011", "Deep orange",       227, 128,   0),
+    ral("RAL 2012", "Salmon orange",     213, 111,  84),
+    ral("RAL 2013", "Pearl orange",      150,  68,  38),
+
+    // MARK: 3xxx — Reds
+    ral("RAL 3000", "Flame red",         170,  42,  28),
+    ral("RAL 3001", "Signal red",        160,  33,  27),
+    ral("RAL 3002", "Carmine red",       157,  31,  27),
+    ral("RAL 3003", "Ruby red",          130,  22,  22),
+    ral("RAL 3004", "Purple red",        110,  19,  24),
+    ral("RAL 3005", "Wine red",           78,  18,  22),
+    ral("RAL 3007", "Black red",          47,  17,  19),
+    ral("RAL 3009", "Oxide red",         100,  40,  35),
+    ral("RAL 3011", "Brown red",         121,  29,  26),
+    ral("RAL 3012", "Beige red",         195, 151, 132),
+    ral("RAL 3013", "Tomato red",        151,  39,  28),
+    ral("RAL 3014", "Antique pink",      211, 127, 121),
+    ral("RAL 3015", "Light pink",        222, 172, 172),
+    ral("RAL 3016", "Coral red",         165,  55,  41),
+    ral("RAL 3017", "Rose",              220,  91,  95),
+    ral("RAL 3018", "Strawberry red",    208,  64,  76),
+    ral("RAL 3020", "Traffic red",       187,  30,  16),
+    ral("RAL 3022", "Salmon pink",       208, 115,  99),
+    ral("RAL 3027", "Raspberry red",     182,  26,  52),
+    ral("RAL 3028", "Pure red",          200,  40,  28),
+    ral("RAL 3031", "Orient red",        166,  43,  50),
+
+    // MARK: 4xxx — Violets
+    ral("RAL 4001", "Red lilac",         130, 100, 139),
+    ral("RAL 4002", "Red violet",        142,  57,  82),
+    ral("RAL 4003", "Heather violet",    194,  95, 144),
+    ral("RAL 4004", "Claret violet",     100,  18,  56),
+    ral("RAL 4005", "Blue lilac",        108, 105, 160),
+    ral("RAL 4006", "Traffic purple",    154,  45, 121),
+    ral("RAL 4007", "Purple violet",      59,  23,  55),
+    ral("RAL 4008", "Signal violet",     132,  58, 136),
+    ral("RAL 4009", "Pastel violet",     163, 136, 163),
+    ral("RAL 4010", "Telemagenta",       186,  62, 129),
+
+    // MARK: 5xxx — Blues
+    ral("RAL 5000", "Violet blue",        38,  73, 122),
+    ral("RAL 5001", "Green blue",         13,  76, 117),
+    ral("RAL 5002", "Ultramarine blue",    0,  43, 135),
+    ral("RAL 5003", "Sapphire blue",      29,  57, 104),
+    ral("RAL 5004", "Black blue",         13,  20,  51),
+    ral("RAL 5005", "Signal blue",         0,  75, 141),
+    ral("RAL 5007", "Brilliant blue",     55, 107, 163),
+    ral("RAL 5008", "Grey blue",          32,  58,  79),
+    ral("RAL 5009", "Azure blue",         31, 107, 160),
+    ral("RAL 5010", "Gentian blue",        0,  79, 159),
+    ral("RAL 5011", "Steel blue",         18,  44,  83),
+    ral("RAL 5012", "Light blue",          0, 131, 199),
+    ral("RAL 5013", "Cobalt blue",         2,  43,  95),
+    ral("RAL 5014", "Pigeon blue",        92, 130, 168),
+    ral("RAL 5015", "Sky blue",            0, 124, 191),
+    ral("RAL 5017", "Traffic blue",        0,  95, 160),
+    ral("RAL 5018", "Turquoise blue",      0, 153, 169),
+    ral("RAL 5019", "Capri blue",          0,  99, 158),
+    ral("RAL 5020", "Ocean blue",          0,  69,  90),
+    ral("RAL 5021", "Water blue",          0, 126, 140),
+    ral("RAL 5022", "Night blue",         14,  36,  96),
+    ral("RAL 5023", "Distant blue",       58, 107, 168),
+    ral("RAL 5024", "Pastel blue",        94, 152, 193),
+
+    // MARK: 6xxx — Greens
+    ral("RAL 6000", "Patina green",       49, 120,  89),
+    ral("RAL 6001", "Emerald green",      45, 115,  54),
+    ral("RAL 6002", "Leaf green",         38,  98,  45),
+    ral("RAL 6003", "Olive green",        73,  88,  59),
+    ral("RAL 6004", "Blue green",          0,  72,  67),
+    ral("RAL 6005", "Moss green",          0,  73,  52),
+    ral("RAL 6006", "Grey olive",         51,  52,  40),
+    ral("RAL 6007", "Bottle green",       34,  47,  27),
+    ral("RAL 6008", "Brown green",        40,  43,  31),
+    ral("RAL 6009", "Fir green",          30,  58,  39),
+    ral("RAL 6010", "Grass green",        54, 114,  48),
+    ral("RAL 6011", "Reseda green",      103, 136,  92),
+    ral("RAL 6012", "Black green",        39,  62,  57),
+    ral("RAL 6013", "Reed green",        117, 119,  86),
+    ral("RAL 6014", "Yellow olive",       71,  67,  51),
+    ral("RAL 6015", "Black olive",        54,  57,  46),
+    ral("RAL 6016", "Turquoise green",     0, 111,  75),
+    ral("RAL 6017", "May green",          75, 137,  60),
+    ral("RAL 6018", "Yellow green",       87, 165,  61),
+    ral("RAL 6019", "Pastel green",      189, 218, 181),
+    ral("RAL 6020", "Chrome green",       55,  76,  45),
+    ral("RAL 6021", "Pale green",        129, 163, 121),
+    ral("RAL 6024", "Traffic green",       0, 138,  93),
+    ral("RAL 6025", "Fern green",         77, 120,  51),
+    ral("RAL 6026", "Opal green",          0,  95,  78),
+    ral("RAL 6027", "Light green",        125, 189, 189),
+    ral("RAL 6028", "Pine green",         44,  89,  64),
+    ral("RAL 6029", "Mint green",          0, 121,  63),
+    ral("RAL 6032", "Signal green",        0, 134,  85),
+    ral("RAL 6033", "Mint turquoise",      0, 132, 144),
+    ral("RAL 6034", "Pastel turquoise",  136, 195, 193),
+    ral("RAL 6037", "Pure green",          0, 163,  58),
+
+    // MARK: 7xxx — Greys
+    ral("RAL 7000", "Squirrel grey",     120, 138, 151),
+    ral("RAL 7001", "Silver grey",       138, 156, 169),
+    ral("RAL 7002", "Olive grey",        126, 123, 101),
+    ral("RAL 7003", "Moss grey",         111, 113, 100),
+    ral("RAL 7004", "Signal grey",       149, 149, 149),
+    ral("RAL 7005", "Mouse grey",        100, 107, 104),
+    ral("RAL 7006", "Beige grey",        108,  97,  83),
+    ral("RAL 7008", "Khaki grey",        106,  97,  66),
+    ral("RAL 7009", "Green grey",         76,  84,  72),
+    ral("RAL 7010", "Tarpaulin grey",     73,  80,  71),
+    ral("RAL 7011", "Iron grey",          67,  80,  88),
+    ral("RAL 7012", "Basalt grey",        76,  93, 100),
+    ral("RAL 7013", "Brown grey",         74,  73,  60),
+    ral("RAL 7015", "Slate grey",         62,  72,  82),
+    ral("RAL 7016", "Anthracite grey",    41,  52,  57),
+    ral("RAL 7021", "Black grey",         29,  35,  36),
+    ral("RAL 7022", "Umbra grey",         61,  60,  55),
+    ral("RAL 7023", "Concrete grey",     121, 123, 117),
+    ral("RAL 7024", "Graphite grey",      71,  80,  89),
+    ral("RAL 7026", "Granite grey",       44,  63,  69),
+    ral("RAL 7030", "Stone grey",        150, 148, 135),
+    ral("RAL 7031", "Blue grey",          78,  99, 109),
+    ral("RAL 7032", "Pebble grey",       188, 186, 168),
+    ral("RAL 7033", "Cement grey",       128, 136, 122),
+    ral("RAL 7034", "Yellow grey",       149, 144, 116),
+    ral("RAL 7035", "Light grey",        215, 215, 215),
+    ral("RAL 7036", "Platinum grey",     152, 147, 149),
+    ral("RAL 7037", "Dusty grey",        137, 139, 135),
+    ral("RAL 7038", "Agate grey",        195, 195, 189),
+    ral("RAL 7039", "Quartz grey",       108, 104,  96),
+    ral("RAL 7040", "Window grey",       159, 165, 172),
+    ral("RAL 7042", "Traffic grey A",    141, 148, 143),
+    ral("RAL 7043", "Traffic grey B",     76,  80,  75),
+    ral("RAL 7044", "Silk grey",         200, 198, 189),
+    ral("RAL 7045", "Telegrey 1",        143, 147, 152),
+    ral("RAL 7046", "Telegrey 2",        127, 134, 141),
+    ral("RAL 7047", "Telegrey 4",        211, 211, 207),
+
+    // MARK: 8xxx — Browns
+    ral("RAL 8000", "Green brown",       134,  97,  53),
+    ral("RAL 8001", "Ochre brown",       151,  90,  38),
+    ral("RAL 8002", "Signal brown",      116,  73,  63),
+    ral("RAL 8003", "Clay brown",        126,  76,  37),
+    ral("RAL 8004", "Copper brown",      143,  75,  46),
+    ral("RAL 8007", "Fawn brown",        110,  67,  36),
+    ral("RAL 8008", "Olive brown",       111,  74,  37),
+    ral("RAL 8009", "Hazel brown",        93,  63,  49),
+    ral("RAL 8010", "Tent brown",         90,  57,  34),
+    ral("RAL 8011", "Nut brown",          79,  48,  27),
+    ral("RAL 8012", "Red brown",         105,  44,  36),
+    ral("RAL 8014", "Sepia brown",        62,  43,  32),
+    ral("RAL 8015", "Chestnut brown",    100,  45,  33),
+    ral("RAL 8016", "Mahogany brown",     76,  35,  25),
+    ral("RAL 8017", "Chocolate brown",    69,  40,  31),
+    ral("RAL 8019", "Grey brown",         57,  44,  40),
+    ral("RAL 8022", "Black brown",        21,  14,  14),
+    ral("RAL 8023", "Orange brown",      163,  91,  41),
+    ral("RAL 8024", "Beige brown",       121,  83,  55),
+    ral("RAL 8025", "Pale brown",        117,  85,  68),
+    ral("RAL 8028", "Terra brown",        78,  55,  34),
+
+    // MARK: 9xxx — Whites & Blacks
+    ral("RAL 9001", "Cream",             233, 228, 213),
+    ral("RAL 9002", "Grey white",        213, 212, 200),
+    ral("RAL 9003", "Signal white",      242, 243, 237),
+    ral("RAL 9004", "Signal black",       44,  44,  44),
+    ral("RAL 9005", "Jet black",          14,  14,  16),
+    ral("RAL 9006", "White aluminium",   166, 168, 170),
+    ral("RAL 9007", "Grey aluminium",    135, 132, 127),
+    ral("RAL 9010", "Pure white",        247, 246, 238),
+    ral("RAL 9011", "Graphite black",     23,  24,  25),
+    ral("RAL 9016", "Traffic white",     248, 248, 248),
+    ral("RAL 9017", "Traffic black",      26,  24,  24),
+    ral("RAL 9018", "Papyrus white",     215, 219, 213),
+    ral("RAL 9022", "Pearl light grey",  155, 154, 152),
+    ral("RAL 9023", "Pearl dark grey",   130, 130, 128),
+]
