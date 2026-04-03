@@ -1,21 +1,23 @@
-//
-//  ContentView.swift
-//  Paletta
-//
-//  Created by Wallace Soares on 02/04/26.
-//
-
 import SwiftUI
 
 struct ContentView: View {
+
+    @StateObject private var camera = CameraViewModel()
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        ZStack(alignment: .bottom) {
+            // Fullscreen camera feed
+            CameraPreviewView(session: camera.session)
+                .ignoresSafeArea()
+
+            // Live palette overlay
+            if !camera.palette.isEmpty {
+                PaletteView(colors: camera.palette)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
         }
-        .padding()
+        .onAppear { camera.start() }
+        .onDisappear { camera.stop() }
     }
 }
 
