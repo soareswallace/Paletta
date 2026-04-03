@@ -1,17 +1,24 @@
-//
-//  PalettaApp.swift
-//  Paletta
-//
-//  Created by Wallace Soares on 02/04/26.
-//
-
 import SwiftUI
 
 @main
 struct PalettaApp: App {
+
+    @State private var splashDone = false
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ZStack {
+                ContentView()
+                    .opacity(splashDone ? 1 : 0)
+
+                if !splashDone {
+                    SplashView {
+                        withAnimation(.easeInOut(duration: 0.5)) {
+                            splashDone = true
+                        }
+                    }
+                }
+            }
         }
     }
 }
