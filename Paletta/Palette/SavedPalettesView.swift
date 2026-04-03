@@ -8,8 +8,6 @@ struct SavedPalettesView: View {
 
     @ObservedObject var store: PaletteStoreViewModel
     @Environment(\.dismiss) private var dismiss
-    @State private var exportImage: UIImage?
-    @State private var showShareSheet = false
 
     var body: some View {
         ZStack {
@@ -54,10 +52,7 @@ struct SavedPalettesView: View {
                                 PaletteCard(
                                     palette: palette,
                                     onDelete: { store.delete(palette) },
-                                    onExport: { image in
-                                        exportImage = image
-                                        showShareSheet = true
-                                    }
+                                    onExport: { image in presentShare(image) }
                                 )
                             }
                         }
@@ -67,11 +62,15 @@ struct SavedPalettesView: View {
                 }
             }
         }
-        .sheet(isPresented: $showShareSheet) {
-            if let img = exportImage {
-                ShareSheet(items: [img])
-            }
-        }
+    }
+
+    private func presentShare(_ image: UIImage) {
+        let vc = UIActivityViewController(activityItems: [image], applicationActivities: nil)
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let root = windowScene.windows.first?.rootViewController else { return }
+        var top = root
+        while let presented = top.presentedViewController { top = presented }
+        top.present(vc, animated: true)
     }
 }
 
@@ -135,14 +134,6 @@ private struct PaletteCard: View {
         .padding(16)
         .background(cardBackground, in: RoundedRectangle(cornerRadius: 16))
     }
-}
-
-private struct ShareSheet: UIViewControllerRepresentable {
-    let items: [Any]
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        UIActivityViewController(activityItems: items, applicationActivities: nil)
-    }
-    func updateUIViewController(_ uvc: UIActivityViewController, context: Context) {}
 }
 
 // MARK: - ViewModel
