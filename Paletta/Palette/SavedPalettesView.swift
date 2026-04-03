@@ -1,73 +1,129 @@
 import SwiftUI
 import Combine
 
+private let appBackground = Color(red: 0.08, green: 0.08, blue: 0.08)
+private let cardBackground = Color(white: 1, opacity: 0.06)
+
 struct SavedPalettesView: View {
 
     @ObservedObject var store: PaletteStoreViewModel
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if store.palettes.isEmpty {
-                    ContentUnavailableView(
-                        "No Saved Palettes",
-                        systemImage: "swatchpalette",
-                        description: Text("Save a palette from the camera view.")
-                    )
-                } else {
-                    List {
-                        ForEach(store.palettes) { palette in
-                            SavedPaletteRow(palette: palette)
-                        }
-                        .onDelete { indexSet in
-                            indexSet.forEach { store.delete(store.palettes[$0]) }
-                        }
-                    }
-                    .listStyle(.plain)
-                }
-            }
-            .navigationTitle("Saved Palettes")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
+        ZStack {
+            appBackground.ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                // Header
+                HStack {
+                    Text("Saved Palettes")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundStyle(.white)
+                    Spacer()
                     Button("Done") { dismiss() }
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundStyle(.white.opacity(0.7))
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 20)
+                .padding(.bottom, 16)
+
+                Divider()
+                    .background(Color.white.opacity(0.08))
+
+                if store.palettes.isEmpty {
+                    Spacer()
+                    VStack(spacing: 16) {
+                        Image(systemName: "swatchpalette")
+                            .font(.system(size: 52, weight: .light))
+                            .foregroundStyle(.white.opacity(0.2))
+                        Text("No Saved Palettes")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundStyle(.white.opacity(0.4))
+                        Text("Save a palette from the camera view.")
+                            .font(.system(size: 14))
+                            .foregroundStyle(.white.opacity(0.25))
+                    }
+                    Spacer()
+                } else {
+                    ScrollView {
+                        VStack(spacing: 12) {
+                            ForEach(store.palettes) { palette in
+                                PaletteCard(
+                                    palette: palette,
+                                    onDelete: { store.delete(palette) }
+                                )
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 16)
+                    }
                 }
             }
         }
     }
 }
 
-private struct SavedPaletteRow: View {
+private struct PaletteCard: View {
 
     let palette: SavedPalette
+    let onDelete: () -> Void
     @State private var showShareSheet = false
     @State private var exportImage: UIImage?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(palette.name)
-                .font(.headline)
-            HStack(spacing: 6) {
+        VStack(alignment: .leading, spacing: 12) {
+            // Name + actions
+            HStack {
+                Text(palette.name)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(.white)
+                Spacer()
+                HStack(spacing: 16) {
+                    Button {
+                        let colors = palette.hexCodes.compactMap { UIColor(hexString: $0) }
+                        exportImage = PaletteExporter.image(from: colors, format: .hex)
+                        showShareSheet = true
+                    } label: {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundStyle(.white.opacity(0.5))
+                    }
+                    .accessibilityLabel("Export \(palette.name)")
+
+                    Button(role: .destructive) {
+                        withAnimation { onDelete() }
+                    } label: {
+                        Image(systemName: "trash")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundStyle(.white.opacity(0.35))
+                    }
+                    .accessibilityLabel("Delete \(palette.name)")
+                }
+            }
+
+            // Swatches
+            HStack(spacing: 8) {
                 ForEach(palette.hexCodes, id: \.self) { hex in
-                    RoundedRectangle(cornerRadius: 6)
+                    RoundedRectangle(cornerRadius: 8)
                         .fill(Color(hex: hex) ?? .gray)
-                        .frame(width: 40, height: 40)
-                        .shadow(color: .black.opacity(0.15), radius: 3, y: 1)
+                        .frame(height: 48)
+                        .shadow(color: (Color(hex: hex) ?? .clear).opacity(0.4), radius: 6, y: 3)
+                }
+            }
+
+            // Hex codes
+            HStack(spacing: 0) {
+                ForEach(palette.hexCodes, id: \.self) { hex in
+                    Text(hex)
+                        .font(.system(size: 9, weight: .medium, design: .monospaced))
+                        .foregroundStyle(.white.opacity(0.3))
+                        .frame(maxWidth: .infinity)
                 }
             }
         }
-        .padding(.vertical, 6)
-        .swipeActions(edge: .leading) {
-            Button {
-                let colors = palette.hexCodes.compactMap { UIColor(hexString: $0) }
-                exportImage = PaletteExporter.image(from: colors, format: .hex)
-                showShareSheet = true
-            } label: {
-                Label("Export", systemImage: "square.and.arrow.up")
-            }
-            .tint(.blue)
-        }
+        .padding(16)
+        .background(cardBackground, in: RoundedRectangle(cornerRadius: 16))
         .sheet(isPresented: $showShareSheet) {
             if let img = exportImage {
                 ShareSheet(items: [img])
