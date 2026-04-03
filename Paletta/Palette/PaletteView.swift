@@ -46,6 +46,16 @@ private struct SwatchView: View {
         }
     }
 
+    private var accessibilityDescription: String {
+        switch format {
+        case .hex:
+            return "Color \(color.hexString)"
+        case .ral:
+            let match = nearestRAL(to: color)
+            return "\(match.code), \(match.name)"
+        }
+    }
+
     private var sublabel: String? {
         guard format == .ral else { return nil }
         return nearestRAL(to: color).name
@@ -76,5 +86,8 @@ private struct SwatchView: View {
         .onTapGesture {
             UIPasteboard.general.string = label
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityDescription)
+        .accessibilityHint("Double tap to copy")
     }
 }
