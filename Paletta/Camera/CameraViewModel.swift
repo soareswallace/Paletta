@@ -1,6 +1,7 @@
 import AVFoundation
 import SwiftUI
 
+@MainActor
 class CameraViewModel: NSObject, ObservableObject {
 
     @Published var palette: [UIColor] = []
@@ -62,9 +63,9 @@ class CameraViewModel: NSObject, ObservableObject {
 
 extension CameraViewModel: AVCaptureVideoDataOutputSampleBufferDelegate {
 
-    func captureOutput(_ output: AVCaptureOutput,
-                       didOutput sampleBuffer: CMSampleBuffer,
-                       from connection: AVCaptureConnection) {
+    nonisolated func captureOutput(_ output: AVCaptureOutput,
+                                   didOutput sampleBuffer: CMSampleBuffer,
+                                   from connection: AVCaptureConnection) {
 
         let now = Date()
         guard now.timeIntervalSince(lastProcessedAt) >= throttleInterval else { return }
