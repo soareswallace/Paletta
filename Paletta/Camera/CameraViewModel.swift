@@ -18,15 +18,17 @@ class CameraViewModel: ObservableObject {
 
     init() {
         controller.onColors = { [weak self] colors in
+            guard let self else { return }
             Task { @MainActor in
                 withAnimation(.easeInOut(duration: 0.3)) {
-                    self?.palette = colors
+                    self.palette = colors
                 }
             }
         }
         controller.onSetupFailure = { [weak self] in
+            guard let self else { return }
             Task { @MainActor in
-                self?.cameraUnavailable = true
+                self.cameraUnavailable = true
             }
         }
     }
@@ -38,9 +40,10 @@ class CameraViewModel: ObservableObject {
             controller.start()
         case .notDetermined:
             AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
+                guard let self else { return }
                 Task { @MainActor in
-                    if granted { self?.controller.start() }
-                    else       { self?.permissionDenied = true }
+                    if granted { self.controller.start() }
+                    else       { self.permissionDenied = true }
                 }
             }
         case .denied, .restricted:
