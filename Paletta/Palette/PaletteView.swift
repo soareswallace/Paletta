@@ -5,16 +5,45 @@ enum ColorFormat { case hex, ral }
 struct PaletteView: View {
 
     let colors: [UIColor]
+    @ObservedObject var paletteStore: PaletteStoreViewModel
     @State private var format: ColorFormat = .hex
+    @State private var showSaveAlert = false
+    @State private var paletteName = ""
+    @State private var showShareSheet = false
+    @State private var exportImage: UIImage?
 
     var body: some View {
         VStack(spacing: 12) {
-            // Toggle
-            Picker("Format", selection: $format) {
-                Text("HEX").tag(ColorFormat.hex)
-                Text("RAL").tag(ColorFormat.ral)
+            // Format toggle + action buttons
+            HStack {
+                Picker("Format", selection: $format) {
+                    Text("HEX").tag(ColorFormat.hex)
+                    Text("RAL").tag(ColorFormat.ral)
+                }
+                .pickerStyle(.segmented)
+
+                Spacer(minLength: 12)
+
+                Button {
+                    paletteName = ""
+                    showSaveAlert = true
+                } label: {
+                    Image(systemName: "square.and.arrow.down")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundStyle(.primary)
+                }
+                .accessibilityLabel("Save palette")
+
+                Button {
+                    exportImage = PaletteExporter.image(from: colors, format: format)
+                    showShareSheet = true
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundStyle(.primary)
+                }
+                .accessibilityLabel("Export palette")
             }
-            .pickerStyle(.segmented)
             .padding(.horizontal, 4)
 
             // Swatches
@@ -29,6 +58,22 @@ struct PaletteView: View {
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24))
         .padding(.horizontal, 16)
         .padding(.bottom, 40)
+        .alert("Save Palette", isPresented: $showSaveAlert) {
+            TextField("Name", text: $paletteName)
+            Button("Save") {
+                let name = paletteName.trimmingCharacters(in: .whitespaces)
+                guard !name.isEmpty else { return }
+                paletteStore.save(name: name, hexCodes: colors.map(\.hexString))
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Give this palette a name.")
+        }
+        .sheet(isPresented: $showShareSheet) {
+            if let img = exportImage {
+                ShareSheet(items: [img])
+            }
+        }
     }
 }
 
@@ -106,4 +151,16 @@ private struct SwatchView: View {
         .accessibilityLabel(accessibilityDescription)
         .accessibilityHint("Double tap to copy")
     }
+}
+
+// MARK: - Share sheet bridge
+
+private struct ShareSheet: UIViewControllerRepresentable {
+    let items: [Any]
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: items, applicationActivities: nil)
+    }
+
+    func updateUIViewController(_ uvc: UIActivityViewController, context: Context) {}
 }
