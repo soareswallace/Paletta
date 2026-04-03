@@ -10,6 +10,7 @@ class CameraViewModel: ObservableObject {
 
     @Published var palette: [UIColor] = []
     @Published var permissionDenied = false
+    @Published var cameraUnavailable = false
 
     private let controller = CameraController()
 
@@ -21,6 +22,11 @@ class CameraViewModel: ObservableObject {
                 withAnimation(.easeInOut(duration: 0.3)) {
                     self?.palette = colors
                 }
+            }
+        }
+        controller.onSetupFailure = { [weak self] in
+            Task { @MainActor in
+                self?.cameraUnavailable = true
             }
         }
     }
@@ -52,6 +58,7 @@ class CameraViewModel: ObservableObject {
 private final class CameraController: NSObject {
 
     var onColors: (([UIColor]) -> Void)?
+    var onSetupFailure: (() -> Void)?
 
     let session = AVCaptureSession()
 
@@ -74,7 +81,7 @@ private final class CameraController: NSObject {
             let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
             let input  = try? AVCaptureDeviceInput(device: device),
             session.canAddInput(input)
-        else { session.commitConfiguration(); return }
+        else { session.commitConfiguration(); onSetupFailure?(); return }
 
         session.addInput(input)
 

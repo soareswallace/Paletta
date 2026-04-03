@@ -34,6 +34,21 @@ struct OnboardingView: View {
             Color(red: 0.08, green: 0.08, blue: 0.08)
                 .ignoresSafeArea()
 
+            // Skip button
+            if currentPage < slides.count - 1 {
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button("Skip", action: onDismiss)
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundStyle(.white.opacity(0.45))
+                            .padding(.top, 60)
+                            .padding(.trailing, 24)
+                    }
+                    Spacer()
+                }
+            }
+
             VStack(spacing: 0) {
                 Spacer()
 

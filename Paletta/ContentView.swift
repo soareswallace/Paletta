@@ -4,6 +4,7 @@ struct ContentView: View {
 
     @StateObject private var camera = CameraViewModel()
     @StateObject private var paletteStore = PaletteStoreViewModel(store: UserDefaultsPaletteStore())
+    @Environment(\.scenePhase) private var scenePhase
     @State private var format: ColorFormat = .hex
     @State private var showSaved = false
     @State private var showSaveAlert = false
@@ -53,6 +54,9 @@ struct ContentView: View {
             if camera.permissionDenied {
                 CameraPermissionDeniedView()
                     .ignoresSafeArea()
+            } else if camera.cameraUnavailable {
+                CameraUnavailableView()
+                    .ignoresSafeArea()
             }
         }
         .sheet(isPresented: $showSaved) {
@@ -66,16 +70,20 @@ struct ContentView: View {
         .alert("Save Palette", isPresented: $showSaveAlert) {
             TextField("Name", text: $paletteName)
             Button("Save") {
-                let name = paletteName.trimmingCharacters(in: .whitespaces)
-                guard !name.isEmpty else { return }
-                paletteStore.save(name: name, hexCodes: camera.palette.map(\.hexString))
+                paletteStore.save(
+                    name: paletteName.trimmingCharacters(in: .whitespaces),
+                    hexCodes: camera.palette.map(\.hexString)
+                )
             }
+            .disabled(paletteName.trimmingCharacters(in: .whitespaces).isEmpty)
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("Give this palette a name.")
         }
-        .onAppear { camera.start() }
-        .onDisappear { camera.stop() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { camera.start() }
+            else { camera.stop() }
+        }
     }
 
     private func floatingButton(icon: String, action: @escaping () -> Void) -> some View {
