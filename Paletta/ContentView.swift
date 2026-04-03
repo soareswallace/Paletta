@@ -5,15 +5,19 @@ struct ContentView: View {
     @StateObject private var camera = CameraViewModel()
 
     var body: some View {
-        ZStack(alignment: .bottom) {
-            // Fullscreen camera feed
-            CameraPreviewView(session: camera.session)
-                .ignoresSafeArea()
+        ZStack {
+            if camera.permissionDenied {
+                CameraPermissionDeniedView()
+            } else {
+                ZStack(alignment: .bottom) {
+                    CameraPreviewView(session: camera.session)
+                        .ignoresSafeArea()
 
-            // Live palette overlay
-            if !camera.palette.isEmpty {
-                PaletteView(colors: camera.palette)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    if !camera.palette.isEmpty {
+                        PaletteView(colors: camera.palette)
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                    }
+                }
             }
         }
         .onAppear { camera.start() }

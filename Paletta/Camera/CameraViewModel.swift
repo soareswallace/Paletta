@@ -9,6 +9,7 @@ import UIKit
 class CameraViewModel: ObservableObject {
 
     @Published var palette: [UIColor] = []
+    @Published var permissionDenied = false
 
     private let controller = CameraController()
 
@@ -24,8 +25,26 @@ class CameraViewModel: ObservableObject {
         }
     }
 
-    func start() { controller.start() }
-    func stop()  { controller.stop()  }
+    func start() {
+        let status = AVCaptureDevice.authorizationStatus(for: .video)
+        switch status {
+        case .authorized:
+            controller.start()
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
+                Task { @MainActor in
+                    if granted { self?.controller.start() }
+                    else       { self?.permissionDenied = true }
+                }
+            }
+        case .denied, .restricted:
+            permissionDenied = true
+        @unknown default:
+            break
+        }
+    }
+
+    func stop() { controller.stop() }
 }
 
 // MARK: - Camera Controller (no actor isolation)
