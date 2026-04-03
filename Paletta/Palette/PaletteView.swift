@@ -36,6 +36,7 @@ private struct SwatchView: View {
 
     let color: UIColor
     let format: ColorFormat
+    @State private var copied = false
 
     private var label: String {
         switch format {
@@ -63,10 +64,20 @@ private struct SwatchView: View {
 
     var body: some View {
         VStack(spacing: 6) {
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(color))
-                .frame(height: 56)
-                .shadow(color: Color(color).opacity(0.4), radius: 6, y: 3)
+            ZStack {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(color))
+                    .shadow(color: Color(color).opacity(0.4), radius: 6, y: 3)
+
+                if copied {
+                    Text("Copied!")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .shadow(color: .black.opacity(0.4), radius: 2)
+                        .transition(.scale(scale: 0.8).combined(with: .opacity))
+                }
+            }
+            .frame(height: 56)
 
             Text(label)
                 .font(.system(size: 9, weight: .medium, design: .monospaced))
@@ -85,6 +96,11 @@ private struct SwatchView: View {
         .frame(maxWidth: .infinity)
         .onTapGesture {
             UIPasteboard.general.string = label
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            withAnimation(.easeOut(duration: 0.15)) { copied = true }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                withAnimation(.easeIn(duration: 0.2)) { copied = false }
+            }
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityDescription)
