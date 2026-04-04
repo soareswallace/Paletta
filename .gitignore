@@ -1,0 +1,15 @@
+# Build artifacts
+.build/
+
+# Claude Code local config
+.claude/
+
+# Xcode
+*.xcworkspace/xcuserdata/
+xcuserdata/
+DerivedData/
+*.ipa
+*.xcarchive
+
+# macOS
+.DS_Store
