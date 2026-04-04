@@ -46,6 +46,11 @@ Camera frame capture runs on `com.paletta.processing` DispatchQueue. All state m
 
 ## Testing Approach
 
+Before every commit and push, run the full test suite to confirm correctness:
+```bash
+swift test --package-path PalettaCore
+```
+
 New logic added to `PalettaCore` should follow TDD: write a failing test first, then implement. The `InMemory*` storage implementations exist specifically to enable test-driven development of storage-dependent behavior without touching UserDefaults.
 
 Tests live in `PalettaCore/Tests/PalettaCoreTests/` and cover: KMeans convergence and hue sorting, RAL matching, palette Codable serialization, onboarding state, and color count cycling.
