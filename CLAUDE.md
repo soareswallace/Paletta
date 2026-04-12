@@ -61,3 +61,13 @@ Tests live in `PalettaCore/Tests/PalettaCoreTests/` and cover: KMeans convergenc
 - **Haptics:** `UIImpactFeedbackGenerator(.light)` on swatch tap and color count cycle
 - **Exports:** `PaletteExporter` renders a `UIImage` with swatches + labels; shared via `UIActivityViewController` presented through a `UIViewController` (not directly from SwiftUI sheet)
 - **Color format toggle:** `ColorFormat` enum (`.hex` / `.ral`) passed as `@Binding` between `ContentView` and `PaletteView`
+
+## App Store Submission
+
+### Screenshot Requirements
+- Screenshots must show the app **actively in use** — onboarding, splash, and login screens will be rejected (Guideline 2.3.3)
+- Good screenshots for Paletta: camera view with HEX palette, camera view with RAL palette, Save Palette dialog, Saved Palettes list
+- Avoid screenshots of the iOS share sheet (exposes user's installed apps, looks unprofessional)
+- All screenshots must be **PNG without alpha channel** or **JPEG** — App Store Connect rejects images with transparency
+- To strip alpha on Mac: `sips -s format jpeg -s formatOptions 100 screenshot.png --out screenshot.jpg`
+- Use vibrant, colorful subjects for camera screenshots — they make the palette feature more compelling
